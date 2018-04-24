@@ -4,14 +4,18 @@
 # Matt Ebert 04/2018
 
 from subprocess import Popen, PIPE
+import os.path
 
+
+MAX_DATA_RATE = 30000  # SPS
 
 def read_diff(channel, log2_avgs):
 	if(channel >= 4 or channel < 0):
 		raise KeyError
 	if log2_avgs > 15:
 		log2avgs = 15
-	p = Popen(map(str, ['./ads1256_read_diff', channel, log2_avgs]), stdout=PIPE)
+        script = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ads1256_read_diff')
+	p = Popen(map(str, [script, channel, log2_avgs]), stdout=PIPE)
 	output, err = p.communicate()
 	output = output.strip()
 	if p.returncode:
