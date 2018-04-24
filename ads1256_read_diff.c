@@ -815,7 +815,7 @@ int  main(int argc, char **argv){
 	}
 	adc = ADS1256_GetAdc(channel);
 	volt = (float)(adc*VREF)/(float)(1<<23);
-	printf("%f\n", volt);
+	printf("%.7f", volt);  // 2**-23 = 1e-7
 
 	bcm2835_spi_end();
 	bcm2835_close();
