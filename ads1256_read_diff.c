@@ -6,20 +6,20 @@
  */
 
 /*
-						 define from bcm2835.h                       define from Board DVK511
-								 3.3V | | 5V               ->                 3.3V | | 5V
-		RPI_V2_GPIO_P1_03 | | 5V               ->                  SDA | | 5V
-		RPI_V2_GPIO_P1_05 | | GND              ->                  SCL | | GND
-			 RPI_GPIO_P1_07 | | RPI_GPIO_P1_08   ->                  IO7 | | TX
-									GND | | RPI_GPIO_P1_10   ->                  GND | | RX
-			 RPI_GPIO_P1_11 | | RPI_GPIO_P1_12   ->                  IO0 | | IO1
-		RPI_V2_GPIO_P1_13 | | GND              ->                  IO2 | | GND
-			 RPI_GPIO_P1_15 | | RPI_GPIO_P1_16   ->                  IO3 | | IO4
-									VCC | | RPI_GPIO_P1_18   ->                  VCC | | IO5
-			 RPI_GPIO_P1_19 | | GND              ->                 MOSI | | GND
-			 RPI_GPIO_P1_21 | | RPI_GPIO_P1_22   ->                 MISO | | IO6
-			 RPI_GPIO_P1_23 | | RPI_GPIO_P1_24   ->                  SCK | | CE0
-									GND | | RPI_GPIO_P1_26   ->                  GND | | CE1
+	define from bcm2835.h				define from Board DVK511
+	3.3V 			| | 5V               ->	3.3V 	| | 5V
+	RPI_V2_GPIO_P1_03 	| | 5V               ->	SDA 	| | 5V
+	RPI_V2_GPIO_P1_05 	| | GND              ->	SCL 	| | GND
+	RPI_GPIO_P1_07 		| | RPI_GPIO_P1_08   ->	IO7 	| | TX
+	GND 			| | RPI_GPIO_P1_10   ->	GND 	| | RX
+	RPI_GPIO_P1_11 		| | RPI_GPIO_P1_12   ->	IO0 	| | IO1
+	RPI_V2_GPIO_P1_13 	| | GND              ->	IO2 	| | GND
+	RPI_GPIO_P1_15 		| | RPI_GPIO_P1_16   ->	IO3 	| | IO4
+	VCC 			| | RPI_GPIO_P1_18   ->	VCC 	| | IO5
+	RPI_GPIO_P1_19 		| | GND              ->	MOSI 	| | GND
+	RPI_GPIO_P1_21 		| | RPI_GPIO_P1_22   ->	MISO 	| | IO6
+	RPI_GPIO_P1_23 		| | RPI_GPIO_P1_24   ->	SCK 	| | CE0
+	GND 			| | RPI_GPIO_P1_26   ->	GND 	| | CE1
 
 ::if your raspberry Pi is version 1 or rev 1 or rev A
 RPI_V2_GPIO_P1_03->RPI_GPIO_P1_03
@@ -31,7 +31,6 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 #include <bcm2835.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>
 #include <math.h>
 #include <errno.h>
 
@@ -41,8 +40,6 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 //SCLK   -----   SCLK
 //DRDY  -----   ctl_IO     data  starting
 //RST     -----   ctl_IO     reset
-
-
 
 #define  DRDY  RPI_GPIO_P1_11         //P0
 #define  RST  RPI_GPIO_P1_12     //P1
@@ -56,22 +53,18 @@ RPI_V2_GPIO_P1_13->RPI_GPIO_P1_13
 #define RST_1() 	bcm2835_gpio_write(RST,HIGH);
 #define RST_0() 	bcm2835_gpio_write(RST,LOW);
 
-
+#define MAX_CHANNEL 4
+#define VREF 5
 
 /* Unsigned integer types  */
 #define uint8_t unsigned char
 #define uint16_t unsigned short
 #define uint32_t unsigned long
 
-
-
-
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 
-
-/* gain channel� */
-typedef enum
-{
+/* gain channel */
+typedef enum{
 	ADS1256_GAIN_1			= (0),	/* GAIN   1 */
 	ADS1256_GAIN_2			= (1),	/*GAIN   2 */
 	ADS1256_GAIN_4			= (2),	/*GAIN   4 */
@@ -79,7 +72,7 @@ typedef enum
 	ADS1256_GAIN_16			= (4),	/* GAIN  16 */
 	ADS1256_GAIN_32			= (5),	/*GAIN    32 */
 	ADS1256_GAIN_64			= (6),	/*GAIN    64 */
-}ADS1256_GAIN_E;
+} ADS1256_GAIN_E;
 
 /* Sampling speed choice*/
 /*
@@ -100,10 +93,9 @@ typedef enum
 	00010011 = 5SPS
 	00000011 = 2.5SPS
 */
-typedef enum
-{
-	ADS1256_30000SPS = 0,
-	ADS1256_15000SPS,
+typedef enum{
+	ADS1256_30000SPS = 0,  // according to C99 all enum values after an equal are sequential
+	ADS1256_15000SPS,      // so I am = 1 implicitly
 	ADS1256_7500SPS,
 	ADS1256_3750SPS,
 	ADS1256_2000SPS,
@@ -122,17 +114,17 @@ typedef enum
 	ADS1256_DRATE_MAX
 }ADS1256_DRATE_E;
 
-#define ADS1256_DRAE_COUNT = 15;
+#define ADS1256_DRATE_COUNT 16
 
 typedef struct{
 	ADS1256_GAIN_E Gain;		/* GAIN  */
-	ADS1256_DRATE_E DataRate;	/* DATA output  speed*/
-	int32_t AdcNow[8];			/* ADC  Conversion value */
-	uint8_t Channel;			/* The current channel*/
-	uint8_t ScanMode;	/*Scanning mode,   0  Single-ended input  8 channel�� 1 Differential input  4 channel*/
+	ADS1256_DRATE_E DataRate;	/* DATA output  speed */
+	int32_t AdcNow[8];		/* ADC  Conversion value */
+	uint8_t Channel;		/* The current channel */
+	uint8_t ScanMode;		/* Scanning mode, 0 Single-ended input 8 channel, 1 Differential input 4 channel */
 }ADS1256_VAR_T;
 
-/*Register definition�� Table 23. Register Map --- ADS1256 datasheet Page 30*/
+/*Register definition Table 23. Register Map --- ADS1256 datasheet Page 30*/
 enum{
 	/*Register address, followed by reset the default values */
 	REG_STATUS = 0,	// x1H
@@ -148,7 +140,7 @@ enum{
 	REG_FSC2   = 10, // xxH
 };
 
-/* Command definition�� TTable 24. Command Definitions --- ADS1256 datasheet Page 34 */
+/* Command definition TTable 24. Command Definitions --- ADS1256 datasheet Page 34 */
 enum{
 	CMD_WAKEUP  = 0x00,	// Completes SYNC and Exits Standby Mode 0000  0000 (00h)
 	CMD_RDATA   = 0x01, // Read Data 0000  0001 (01h)
@@ -188,7 +180,7 @@ static const uint8_t s_tabDataRate[ADS1256_DRATE_MAX] = {
 };
 
 void  bsp_DelayUS(uint64_t micros);
-void ADS1256_StartScan(uint8_t _ucScanMode);
+void ADS1256_StartScan(uint8_t _ucScanMode, uint8_t _ucStartChan);
 static void ADS1256_Send8Bit(uint8_t _data);
 void ADS1256_CfgADC(ADS1256_GAIN_E _gain, ADS1256_DRATE_E _drate);
 static void ADS1256_DelayDATA(void);
@@ -208,7 +200,7 @@ uint8_t ADS1256_Scan(void);
 
 void  bsp_DelayUS(uint64_t micros)
 {
-		bcm2835_delayMicroseconds (micros);
+	bcm2835_delayMicroseconds (micros);
 }
 
 
@@ -234,18 +226,16 @@ void bsp_InitADS1256(void){
 *********************************************************************************************************
 *	name: ADS1256_StartScan
 *	function: Configuration DRDY PIN for external interrupt is triggered
-*	parameter: _ucDiffMode : 0  Single-ended input  8 channel�� 1 Differential input  4 channe
+*	parameter: _ucScanMode : 0  Single-ended input  8 channel, 1 Differential input 4 channel
 *	The return value: NULL
 *********************************************************************************************************
 */
-void ADS1256_StartScan(uint8_t _ucScanMode){
+void ADS1256_StartScan(uint8_t _ucScanMode, uint8_t _ucStartChan){
+	uint8_t i;
 	g_tADS1256.ScanMode = _ucScanMode;
-	{
-		uint8_t i;
-		g_tADS1256.Channel = 0;
-		for (i = 0; i < 8; i++){
-			g_tADS1256.AdcNow[i] = 0;
-		}
+	g_tADS1256.Channel = _ucStartChan;
+	for (i = 0; i < 8; i++){
+		g_tADS1256.AdcNow[i] = 0;
 	}
 }
 
@@ -690,7 +680,6 @@ uint8_t ADS1256_Scan(void){
 		ADS1256_ISR();
 		return 1;
 	}
-
 	return 0;
 }
 
@@ -731,20 +720,14 @@ uint16_t Voltage_Convert(float Vref, float voltage){
 
 /*
 *********************************************************************************************************
-*	name: main
+*	name: setup_spi
 *	function:
 *	parameter: NULL
-*	The return value:  NULL
+*	The return value:  0: no error, 1: error intializing
 *********************************************************************************************************
 */
 
-int  main(){
-	uint8_t id;
-	int32_t adc[4];
-	uint8_t i;
-	uint8_t ch_num = 4;  // read all 4 diff channels
-	int32_t iTemp;
-	uint8_t buf[3];
+uint8_t setup_spi(){
 	if (!bcm2835_init()){
 		return 1;
 	}
@@ -756,28 +739,86 @@ int  main(){
 	bcm2835_gpio_write(SPICS, HIGH);
 	bcm2835_gpio_fsel(DRDY, BCM2835_GPIO_FSEL_INPT);
 	bcm2835_gpio_set_pud(DRDY, BCM2835_GPIO_PUD_UP);
+	return 0;
+}
 
-	//ADS1256_WriteReg(REG_MUX,0x01);
-	//ADS1256_WriteReg(REG_ADCON,0x20);
-	// ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
+/*
+*********************************************************************************************************
+*	name: main
+*	function:
+*	parameter: NULL
+*	The return value:  0
+*********************************************************************************************************
+*/
+
+int  main(int argc, char **argv){
+	int32_t adc;
+	float volt;
+	uint8_t i, j, id;
+	int32_t iTemp;
+	uint8_t buf[3];
+	ADS1256_DRATE_E drate = 0;  // deafult fastest, no avergaing
+
+	if( argc > 3 ){
+		printf("Expecting at most 2 arguements: channel [data rate]\n");
+		return 1;
+	} else if (argc < 2) {
+		printf("Expecting at least 1 arguements: channel [data rate]\n");
+		return 1;
+	}
+
+	if(setup_spi() != 0){
+		printf("Did you forget sudo?");
+		return 1;
+	}
+
+	// process inputs
+	errno = 0; // catch errors, from errno.h
+	int channel = atoi(argv[1]);
+	if (errno != 0){
+		printf("errno %d encoutered converting %s to `int`\n", errno, argv[1]);
+		return 1;
+	}
+	if (channel < 0 || channel > MAX_CHANNEL-1){
+		printf("channel designation: `%d` exceeds MAX_CHANNEL spec: `%d`.\n", channel, MAX_CHANNEL);
+		return 1;
+	}
+	if (argc == 3){
+		int t_drate = atoi(argv[1]);
+		if (errno != 0){
+			printf("errno %d encoutered converting %s to `int`\n", errno, argv[1]);
+			return 1;
+		}
+		// if out of range use default;
+		if (t_drate < ADS1256_DRATE_COUNT && t_drate < 0){
+			drate = (ADS1256_DRATE_E) t_drate;  
+		}
+	}
+		
+	// check communication
 	id = ADS1256_ReadChipID();
 	if (id != 3){
 		printf("Error, ASD1256 Chip ID = 0x%d\r\n", (int)id);
 		return 1;
 	}
-	ADS1256_CfgADC(ADS1256_GAIN_1, ADS1256_15SPS);
-	// Start in differential mode
-	ADS1256_StartScan(1);
-	// scan through all channels once
-	while((ADS1256_Scan() == 0));
-	// retrieve the values
-	for (i = 0; i < ch_num; i++){
-		adc[i] = ADS1256_GetAdc(i);
-		//volt[i] = (adc[i] * 100) / 167;
+
+	// Averaging is done on chip and is set by the DRATE or SPS setting
+	// It also affects the intergation time in the expected way
+	// TODO: allow access to preamp gain settings
+	ADS1256_CfgADC(ADS1256_GAIN_1, drate);
+
+	// Perform 2 reads in differential mode
+	// second read is a dummy read to actually transfer data from first read
+	ADS1256_StartScan(1, channel);
+	for( i=0; i<2; i++ ){
+		while((ADS1256_Scan() == 0));
 	}
-	printf("%ld,%ld,%ld,%ld", (long)adc[0], (long)adc[1], (long)adc[2], (long)adc[3]);
+	adc = ADS1256_GetAdc(channel);
+	volt = (float)(adc*VREF)/(float)(1<<23);
+	printf("%f\n", volt);
+
 	bcm2835_spi_end();
 	bcm2835_close();
 
 	return 0;
-}       
+}
