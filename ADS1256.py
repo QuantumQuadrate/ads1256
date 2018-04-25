@@ -15,7 +15,7 @@ def read_diff(channel, log2_avgs):
         raise KeyError
     if log2_avgs > 15:
         log2_avgs = 15
-        script = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ads1256_read_diff')
+    script = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ads1256_read_diff')
     p = Popen(map(str, [script, channel, log2_avgs]), stdout=PIPE)
     output, err = p.communicate()
     output = output.strip()
